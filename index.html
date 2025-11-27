@@ -23,18 +23,10 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-<!-- 🌑 Overlay para el sidebar móvil -->
-<div id="sidebarOverlay" class="sidebar-overlay"></div>
-
 <div class="app">
 
     <!-- Barra superior -->
     <header class="topbar">
-
-        <!-- ===== Botón hamburguesa solo en móvil ===== -->
-        <button id="menuToggle" class="menu-button">☰</button>
-
         <div class="topbar-left">
             <div class="app-title">
                 <span class="app-name">Presión vs Tiempo</span>
@@ -51,28 +43,21 @@
     <main class="main-layout">
 
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-
-            <!-- Botón de cerrar dentro del menú móvil -->
-            <button id="closeSidebar" class="close-sidebar-button">✖</button>
-
+        <aside class="sidebar">
             <nav class="sidebar-nav">
                 <button class="sidebar-tab active" data-section="dataSection">📁 Datos</button>
                 <button class="sidebar-tab" data-section="analysisSection">📊 Análisis</button>
                 <button class="sidebar-tab" data-section="settingsSection">⚙️ Configuración</button>
             </nav>
 
-            <!-- ======================= -->
-            <!-- Sección: Datos -->
-            <!-- ======================= -->
+            <!-- Sección Datos -->
             <section id="dataSection" class="sidebar-section active">
                 <h2 class="section-title">Fuentes de datos</h2>
 
                 <div class="card upload-card">
                     <h3 class="card-title">Cargar archivos</h3>
                     <p class="card-description">
-                        Arrastra aquí tus archivos <strong>.txt</strong> o <strong>.zip</strong>, 
-                        o utiliza los botones para seleccionarlos.
+                        Arrastra aquí archivos <strong>.txt</strong> o <strong>.zip</strong> con bitácoras de vacío.
                     </p>
 
                     <div id="dropzone" class="dropzone">
@@ -84,6 +69,7 @@
                             Seleccionar TXT
                             <input id="fileTxtInput" type="file" accept=".txt" multiple hidden>
                         </label>
+
                         <label class="button secondary">
                             Seleccionar ZIP
                             <input id="fileZipInput" type="file" accept=".zip" multiple hidden>
@@ -97,54 +83,36 @@
                 </div>
             </section>
 
-            <!-- ======================= -->
-            <!-- Sección: Análisis -->
-            <!-- ======================= -->
+            <!-- Sección Análisis -->
             <section id="analysisSection" class="sidebar-section">
-                <h2 class="section-title">Análisis rápido</h2>
+                <h2 class="section-title">Resumen</h2>
 
                 <div class="card">
-                    <h3 class="card-title">Resumen de datos</h3>
+                    <h3 class="card-title">Estadísticas</h3>
                     <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-label">Series</span>
-                            <span id="statSeriesCount" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Puntos totales</span>
-                            <span id="statPointsCount" class="stat-value">0</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Fecha inicial</span>
-                            <span id="statStartDate" class="stat-value">—</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Fecha final</span>
-                            <span id="statEndDate" class="stat-value">—</span>
-                        </div>
+                        <div class="stat-item"><span class="stat-label">Series</span><span id="statSeriesCount" class="stat-value">0</span></div>
+                        <div class="stat-item"><span class="stat-label">Puntos totales</span><span id="statPointsCount" class="stat-value">0</span></div>
+                        <div class="stat-item"><span class="stat-label">Fecha inicial</span><span id="statStartDate" class="stat-value">—</span></div>
+                        <div class="stat-item"><span class="stat-label">Fecha final</span><span id="statEndDate" class="stat-value">—</span></div>
                     </div>
                 </div>
             </section>
 
-            <!-- ======================= -->
-            <!-- Sección: Configuración -->
-            <!-- ======================= -->
+            <!-- Sección Configuración -->
             <section id="settingsSection" class="sidebar-section">
                 <h2 class="section-title">Configuración</h2>
+
                 <div class="card">
                     <h3 class="card-title">Preferencias</h3>
-                    <p class="card-description small">
-                        Aquí podrás ajustar opciones avanzadas del gráfico más adelante.
-                    </p>
+                    <p class="card-description">Opciones avanzadas estarán disponibles próximamente.</p>
                 </div>
             </section>
-
         </aside>
 
         <!-- Zona central -->
         <section class="workspace">
 
-            <!-- Métricas superiores -->
+            <!-- Métricas -->
             <div class="workspace-header">
                 <div class="metric-card"><span class="metric-label">Presión mínima</span><span id="metricMin" class="metric-value">—</span></div>
                 <div class="metric-card"><span class="metric-label">Presión máxima</span><span id="metricMax" class="metric-value">—</span></div>
@@ -152,31 +120,29 @@
                 <div class="metric-card"><span class="metric-label">Modo de vista</span><span id="metricView" class="metric-value">Logarítmica</span></div>
             </div>
 
-            <!-- Selector de rango -->
-            <div class="card" style="margin-bottom:15px; padding:15px;">
+            <!-- Rango de tiempo -->
+            <div class="card">
                 <h3 class="card-title">Rango de tiempo</h3>
 
-                <div class="time-range-controls">
-                    <select id="timeRange" class="field-input" style="width:100%; margin-bottom:10px;">
-                        <option value="all">Todo</option>
-                        <option value="24h">Últimas 24 horas</option>
-                        <option value="48h">Últimas 48 horas</option>
-                        <option value="7d">Últimos 7 días</option>
-                        <option value="30d">Últimos 30 días</option>
-                        <option value="custom">Personalizado</option>
-                    </select>
+                <select id="timeRange" class="field-input">
+                    <option value="all">Todo</option>
+                    <option value="24h">Últimas 24 horas</option>
+                    <option value="48h">Últimas 48 horas</option>
+                    <option value="7d">Últimos 7 días</option>
+                    <option value="30d">Últimos 30 días</option>
+                    <option value="custom">Personalizado</option>
+                </select>
 
-                    <div id="customRange" style="display:none; margin-top:10px;">
-                        <label>Desde:</label>
-                        <input type="datetime-local" id="customStart" class="field-input" />
+                <div id="customRange" style="display:none; margin-top:10px;">
+                    <label>Desde:</label>
+                    <input type="datetime-local" id="customStart" class="field-input">
 
-                        <label>Hasta:</label>
-                        <input type="datetime-local" id="customEnd" class="field-input" />
+                    <label>Hasta:</label>
+                    <input type="datetime-local" id="customEnd" class="field-input">
 
-                        <button id="applyCustomRange" class="button primary full-width" style="margin-top:10px;">
-                            Aplicar rango
-                        </button>
-                    </div>
+                    <button id="applyCustomRange" class="button primary" style="margin-top:10px;">
+                        Aplicar rango
+                    </button>
                 </div>
             </div>
 
@@ -185,19 +151,15 @@
                 <div id="chartContainer" class="chart-inner"></div>
             </div>
 
-            <!-- Panel inferior -->
+            <!-- Panel de eventos -->
             <div class="event-panel card">
-                <div class="event-panel-header">
-                    <h3 class="card-title">Eventos y observaciones</h3>
-                </div>
-
-                <div id="rangeWarning" class="range-warning"></div>
-
+                <h3 class="card-title">Eventos</h3>
+                <div id="rangeWarning" style="display:none; margin-bottom:10px"></div>
                 <ul id="eventLog" class="event-log"></ul>
             </div>
+
         </section>
     </main>
-
 </div>
 
 <script src="main.js"></script>
