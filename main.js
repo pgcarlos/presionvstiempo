@@ -5,8 +5,8 @@
 const state = {
     theme: "light",
     yScale: "logarithmic",
-    series: [],   // { id, name, color, pointsOriginal, pointsFiltered }
-    currentRange: "all",    // Rango de visualización
+    series: [],
+    currentRange: "all",
     customStart: null,
     customEnd: null
 };
@@ -27,11 +27,62 @@ document.addEventListener("DOMContentLoaded", () => {
     initScaleState();
     initTheme();
     initSidebarTabs();
+    initResponsiveSidebar();   // <<<<<< NUEVO
     initUploadArea();
     initChart();
     initScaleControl();
     initTimeRangeControl();
 });
+
+/* ============================================================
+   0. SIDEBAR RESPONSIVO (Móvil + Tablet)
+   ============================================================ */
+
+function initResponsiveSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("sidebarOverlay");
+    const openBtn = document.getElementById("menuToggle");
+    const closeBtn = document.getElementById("closeSidebar");
+
+    if (!sidebar || !overlay || !openBtn || !closeBtn) return;
+
+    const openMenu = () => {
+        sidebar.classList.add("open");
+        overlay.classList.add("visible");
+        document.body.style.overflow = "hidden";
+    };
+
+    const closeMenu = () => {
+        sidebar.classList.remove("open");
+        overlay.classList.remove("visible");
+        document.body.style.overflow = "";
+    };
+
+    // Abrir menú hamburguesa
+    openBtn.addEventListener("click", openMenu);
+
+    // Botón ✖
+    closeBtn.addEventListener("click", closeMenu);
+
+    // Clic en overlay
+    overlay.addEventListener("click", closeMenu);
+
+    // Cerrar cuando cambias de pestaña dentro del sidebar
+    document.querySelectorAll(".sidebar-tab").forEach(btn => {
+        btn.addEventListener("click", () => {
+            closeMenu();
+        });
+    });
+
+    // Cerrar cuando carga archivo (en móviles)
+    const inputs = [document.getElementById("fileTxtInput"), document.getElementById("fileZipInput")];
+    inputs.forEach(inp => {
+        if (!inp) return;
+        inp.addEventListener("change", () => {
+            closeMenu();
+        });
+    });
+}
 
 
 /* ============================================================
@@ -69,7 +120,7 @@ function applyTheme(theme) {
 
 
 /* ============================================================
-   2. SIDEBAR
+   2. SIDEBAR TABS
    ============================================================ */
 
 function initSidebarTabs() {
@@ -84,15 +135,14 @@ function initSidebarTabs() {
             sections.forEach(s => s.classList.remove("active"));
 
             tab.classList.add("active");
-            const section = document.getElementById(target);
-            if (section) section.classList.add("active");
+            document.getElementById(target).classList.add("active");
         });
     });
 }
 
 
 /* ============================================================
-   3. ÁREA DE CARGA (DRAG & DROP)
+   3. UPLOAD AREA
    ============================================================ */
 
 function initUploadArea() {
@@ -121,16 +171,12 @@ function initUploadArea() {
     });
 
     txtInput.addEventListener("change", e => {
-        handleIncomingFiles(
-            [...e.target.files].filter(f => f.name.toLowerCase().endsWith(".txt"))
-        );
+        handleIncomingFiles([...e.target.files].filter(f => f.name.endsWith(".txt")));
         txtInput.value = "";
     });
 
     zipInput.addEventListener("change", e => {
-        handleIncomingFiles(
-            [...e.target.files].filter(f => f.name.toLowerCase().endsWith(".zip"))
-        );
+        handleIncomingFiles([...e.target.files].filter(f => f.name.endsWith(".zip")));
         zipInput.value = "";
     });
 }
@@ -147,7 +193,7 @@ async function readTxtFile(file) {
             fileName: file.name,
             content: r.result.replace(/[^\x20-\x7E\t\r\n]/g, "")
         });
-        r.onerror = () => reject(r.error);
+        r.onerror = reject;
         r.readAsText(file);
     });
 }
@@ -172,7 +218,7 @@ async function readZipFile(file) {
 
 
 /* ============================================================
-   5. PARSEAR DATOS
+   5. PARSEO DE DATOS
    ============================================================ */
 
 function parseDataFromTxt(text) {
@@ -225,8 +271,7 @@ async function handleIncomingFiles(files) {
             const pts = parseDataFromTxt(txt.content);
             if (!pts.length) continue;
 
-            const s = createSeriesObject(txt.fileName, color, pts);
-            state.series.push(s);
+            state.series.push(createSeriesObject(txt.fileName, color, pts));
         }
     }
 
@@ -240,9 +285,7 @@ async function handleIncomingFiles(files) {
    ============================================================ */
 
 function initChart() {
-    const container = document.getElementById("chartContainer");
-
-    chartInstance = Highcharts.chart(container, {
+    chartInstance = Highcharts.chart("chartContainer", {
         chart: { zoomType: "x" },
         title: { text: "Presión vs Tiempo" },
         subtitle: { text: "Carga uno o varios archivos TXT/ZIP para comenzar." },
@@ -276,16 +319,12 @@ function applyHighchartsTheme(theme) {
         },
         xAxis: {
             labels: { style: { color: isDark ? "#e5e7eb" : "#0f172a" } },
-            gridLineColor: isDark
-                ? "rgba(148,163,184,0.25)"
-                : "rgba(148,163,184,0.3)"
+            gridLineColor: isDark ? "rgba(148,163,184,0.25)" : "rgba(148,163,184,0.3)"
         },
         yAxis: {
             labels: { style: { color: isDark ? "#e5e7eb" : "#0f172a" } },
             title: { style: { color: isDark ? "#e5e7eb" : "#0f172a" } },
-            gridLineColor: isDark
-                ? "rgba(148,163,184,0.25)"
-                : "rgba(148,163,184,0.3)"
+            gridLineColor: isDark ? "rgba(148,163,184,0.25)" : "rgba(148,163,184,0.3)"
         },
         legend: {
             itemStyle: {
@@ -299,7 +338,7 @@ function applyHighchartsTheme(theme) {
 
 
 /* ============================================================
-   8. AGREGAR / QUITAR SERIES GRAFICADAS
+   8. AGREGAR / QUITAR SERIES EN GRÁFICO
    ============================================================ */
 
 function plotAllFilteredSeries() {
@@ -364,14 +403,12 @@ function renderFileList() {
    ============================================================ */
 
 function clearEvents() {
-    const list = document.getElementById("eventLog");
-    if (list) list.innerHTML = "";
+    document.getElementById("eventLog").innerHTML = "";
 }
 
 function renderEvents(seriesObj) {
     clearEvents();
     const list = document.getElementById("eventLog");
-    if (!list) return;
 
     const pts = seriesObj.pointsFiltered;
 
@@ -415,12 +452,12 @@ function updateStats() {
     if (seriesCountEl) seriesCountEl.textContent = state.series.length;
 
     if (!pts.length) {
-        if (minEl) minEl.innerText = "—";
-        if (maxEl) maxEl.innerText = "—";
-        if (avgEl) avgEl.innerText = "—";
-        if (countEl) countEl.innerText = "0";
-        if (startDateEl) startDateEl.innerText = "—";
-        if (endDateEl) endDateEl.innerText = "—";
+        minEl.innerText = "—";
+        maxEl.innerText = "—";
+        avgEl.innerText = "—";
+        countEl.innerText = "0";
+        startDateEl.innerText = "—";
+        endDateEl.innerText = "—";
         return;
     }
 
@@ -434,13 +471,13 @@ function updateStats() {
     const tMin = new Date(Math.min(...times));
     const tMax = new Date(Math.max(...times));
 
-    if (minEl) minEl.innerText = min.toExponential(3);
-    if (maxEl) maxEl.innerText = max.toExponential(3);
-    if (avgEl) avgEl.innerText = avg.toExponential(3);
-    if (countEl) countEl.innerText = pts.length;
+    minEl.innerText = min.toExponential(3);
+    maxEl.innerText = max.toExponential(3);
+    avgEl.innerText = avg.toExponential(3);
+    countEl.innerText = pts.length;
 
-    if (startDateEl) startDateEl.innerText = tMin.toLocaleString();
-    if (endDateEl) endDateEl.innerText = tMax.toLocaleString();
+    startDateEl.innerText = tMin.toLocaleString();
+    endDateEl.innerText = tMax.toLocaleString();
 }
 
 
@@ -466,9 +503,8 @@ function initScaleControl() {
 }
 
 function updateScaleUI() {
-    const el = document.getElementById("metricView");
-    if (el)
-        el.innerText = state.yScale === "logarithmic" ? "Logarítmica" : "Lineal";
+    document.getElementById("metricView").innerText =
+        state.yScale === "logarithmic" ? "Logarítmica" : "Lineal";
 }
 
 
@@ -511,12 +547,11 @@ function updateComparisonDiff() {
 
 
 /* ============================================================
-   14. ADVERTENCIA DE SERIES EXCLUIDAS
+   14. WARNING SERIES EXCLUIDAS
    ============================================================ */
 
 function showExcludedSeriesWarning(excluded) {
     const warn = document.getElementById("rangeWarning");
-    if (!warn) return;
 
     if (!excluded.length) {
         warn.style.display = "none";
@@ -524,12 +559,10 @@ function showExcludedSeriesWarning(excluded) {
         return;
     }
 
-    const names = excluded.map(s => `<strong>${s.name}</strong>`).join(", ");
-
     warn.style.display = "block";
     warn.innerHTML = `
         ⚠ Las siguientes series no contienen datos en el rango seleccionado:<br>
-        ${names}
+        ${excluded.map(s => `<strong>${s.name}</strong>`).join(", ")}
     `;
 }
 
@@ -554,20 +587,19 @@ function initTimeRangeControl() {
             applyRangeFilter();
     };
 
-    if (applyBtn) {
-        applyBtn.onclick = () => {
-            const s = document.getElementById("customStart").value;
-            const e = document.getElementById("customEnd").value;
+    applyBtn.onclick = () => {
+        const s = document.getElementById("customStart").value;
+        const e = document.getElementById("customEnd").value;
 
-            if (!s || !e) return;
+        if (!s || !e) return;
 
-            state.customStart = new Date(s).getTime();
-            state.customEnd = new Date(e).getTime();
+        state.customStart = new Date(s).getTime();
+        state.customEnd = new Date(e).getTime();
 
-            applyRangeFilter();
-        };
-    }
+        applyRangeFilter();
+    };
 }
+
 
 function applyRangeFilter() {
     if (!state.series.length) {
@@ -576,7 +608,6 @@ function applyRangeFilter() {
         return;
     }
 
-    // Rango real de los datos cargados
     const allPoints = state.series.flatMap(s => s.pointsOriginal);
     const minTime = Math.min(...allPoints.map(p => p[0]));
     const maxTime = Math.max(...allPoints.map(p => p[0]));
@@ -589,23 +620,18 @@ function applyRangeFilter() {
             start = minTime;
             end = maxTime;
             break;
-
         case "24h":
             start = maxTime - 24 * 3600 * 1000;
             break;
-
         case "48h":
             start = maxTime - 48 * 3600 * 1000;
             break;
-
         case "7d":
             start = maxTime - 7 * 24 * 3600 * 1000;
             break;
-
         case "30d":
             start = maxTime - 30 * 24 * 3600 * 1000;
             break;
-
         case "custom":
             start = state.customStart;
             end = state.customEnd;
@@ -615,13 +641,8 @@ function applyRangeFilter() {
     const excluded = [];
 
     for (const s of state.series) {
-        s.pointsFiltered = s.pointsOriginal.filter(p =>
-            p[0] >= start && p[0] <= end
-        );
-
-        if (s.pointsFiltered.length === 0) {
-            excluded.push(s);
-        }
+        s.pointsFiltered = s.pointsOriginal.filter(p => p[0] >= start && p[0] <= end);
+        if (s.pointsFiltered.length === 0) excluded.push(s);
     }
 
     showExcludedSeriesWarning(excluded);

@@ -23,10 +23,18 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+<!-- 🌑 Overlay para el sidebar móvil -->
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+
 <div class="app">
 
     <!-- Barra superior -->
     <header class="topbar">
+
+        <!-- ===== Botón hamburguesa solo en móvil ===== -->
+        <button id="menuToggle" class="menu-button">☰</button>
+
         <div class="topbar-left">
             <div class="app-title">
                 <span class="app-name">Presión vs Tiempo</span>
@@ -35,17 +43,19 @@
         </div>
 
         <div class="topbar-right">
-            <button id="themeToggle" class="icon-button" title="Cambiar tema">
-                🌙
-            </button>
+            <button id="themeToggle" class="icon-button" title="Cambiar tema">🌙</button>
         </div>
     </header>
 
     <!-- Contenido principal -->
     <main class="main-layout">
-        
+
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
+
+            <!-- Botón de cerrar dentro del menú móvil -->
+            <button id="closeSidebar" class="close-sidebar-button">✖</button>
+
             <nav class="sidebar-nav">
                 <button class="sidebar-tab active" data-section="dataSection">📁 Datos</button>
                 <button class="sidebar-tab" data-section="analysisSection">📊 Análisis</button>
@@ -128,6 +138,7 @@
                     </p>
                 </div>
             </section>
+
         </aside>
 
         <!-- Zona central -->
@@ -141,9 +152,7 @@
                 <div class="metric-card"><span class="metric-label">Modo de vista</span><span id="metricView" class="metric-value">Logarítmica</span></div>
             </div>
 
-            <!-- ======================= -->
-            <!-- NUEVO: Selector de rango -->
-            <!-- ======================= -->
+            <!-- Selector de rango -->
             <div class="card" style="margin-bottom:15px; padding:15px;">
                 <h3 class="card-title">Rango de tiempo</h3>
 
@@ -171,30 +180,18 @@
                 </div>
             </div>
 
-            <!-- ======================= -->
-            <!-- Contenedor del gráfico -->
-            <!-- ======================= -->
+            <!-- Gráfico -->
             <div class="chart-container card">
                 <div id="chartContainer" class="chart-inner"></div>
             </div>
 
-            <!-- ======================= -->
             <!-- Panel inferior -->
-            <!-- ======================= -->
             <div class="event-panel card">
                 <div class="event-panel-header">
                     <h3 class="card-title">Eventos y observaciones</h3>
                 </div>
-                <div id="rangeWarning" class="range-warning" style="
-                    display:none;
-                    padding:8px 12px;
-                    background:rgba(255,180,0,0.15);
-                    color:#b45309;
-                    border:1px solid rgba(255,180,0,0.35);
-                    border-radius:6px;
-                    margin-bottom:10px;
-                    font-size:13px;
-                "></div>
+
+                <div id="rangeWarning" class="range-warning"></div>
 
                 <ul id="eventLog" class="event-log"></ul>
             </div>
