@@ -544,6 +544,24 @@ function initTimeRangeControl() {
         };
     }
 }
+function showExcludedSeriesWarning(excluded) {
+    const warn = document.getElementById("rangeWarning");
+    if (!warn) return;
+
+    if (!excluded.length) {
+        warn.style.display = "none";
+        warn.innerHTML = "";
+        return;
+    }
+
+    const names = excluded.map(s => `<strong>${s.name}</strong>`).join(", ");
+
+    warn.style.display = "block";
+    warn.innerHTML = `
+        ⚠ Las siguientes series no tienen datos dentro del rango seleccionado:<br>
+        ${names}
+    `;
+}
 
 function applyRangeFilter() {
     if (!state.series.length) {
@@ -587,18 +605,29 @@ function applyRangeFilter() {
             break;
     }
 
+    const excluded = [];
+
     for (const s of state.series) {
         s.pointsFiltered = s.pointsOriginal.filter(p =>
             p[0] >= start && p[0] <= end
         );
+
+        if (s.pointsFiltered.length === 0) {
+            excluded.push(s);
+        }
     }
 
+    // Mostrar advertencia
+    showExcludedSeriesWarning(excluded);
+
+    // Renderizar
     plotAllFilteredSeries();
     clearEvents();
 
     if (state.series.length > 0)
         renderEvents(state.series[state.series.length - 1]);
 }
+
 
 
 /* ============================================================
